@@ -119,7 +119,6 @@ window.addEventListener('DOMContentLoaded', () => {
     { name:'Ring of Power',   slot:'ring',     stats:{ attackMin:1, attackMax:2 } },
     { name:'Necklace of Health',slot:'necklace',stats:{ maxHp:20 } },
     { name:'Amulet of Protection',slot:'necklace',stats:{ defense:2 } }
-    // … expand as desired …
   ];
 
   const skillDefinitions = [
@@ -159,6 +158,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let hero = {}, enemy = {};
   let difficulty = 'normal', sfxEnabled = true;
   let pendingLoot = null;
+  let currentTurn = 'hero';
 
   const mainMenu        = document.getElementById('main-menu');
   const menuNew         = document.getElementById('menu-new');
@@ -259,8 +259,9 @@ window.addEventListener('DOMContentLoaded', () => {
   const namePrefixes = ["Ara","Eli","Gal","Ser","Kael","Rha","Mira","Thal","Zan","Lor","Val","Ner","Del","Fen","Ori","Ari","Tar","Sol","Mal","Kor","Ly","Jor","Bri","Xan","Nia","Zor","Vel","Rin","Cai","Kri"];
   const nameSuffixes = ["gorn","wen","dor","thos","riel","nor","mir","dus","fiel","ion","as","or","ean","ith","an","ius","am","on","er","us","ara","ael","orin","eth","arae","alos","amir","essa","ondra","elis"];
   function generateRandomName(){
-    return namePrefixes[Math.floor(Math.random()*namePrefixes.length)]
-         + nameSuffixes[Math.floor(Math.random()*nameSuffixes.length)];
+    const pre = namePrefixes[Math.floor(Math.random()*namePrefixes.length)];
+    const suf = nameSuffixes[Math.floor(Math.random()*nameSuffixes.length)];
+    return pre + suf;
   }
   randomNameBtn.addEventListener('click', () => {
     heroNameInput.value = generateRandomName();
@@ -357,13 +358,16 @@ window.addEventListener('DOMContentLoaded', () => {
     };
     applyDifficulty(enemy);
     updateUI();
+    currentTurn = 'hero';
     attackBtn.disabled = false;
+    spellsContainer.querySelectorAll('button').forEach(b=>b.disabled = false);
   }
 
   // ==============================
   // HOTKEYS & SPELL BUTTONS
   // ==============================
   function hotkeyHandler(e){
+    if(currentTurn!=='hero') return;
     let idx = null;
     if(e.key>='1'&&e.key<='9') idx = +e.key-1;
     else if(e.key==='0') idx = 9;
@@ -378,126 +382,136 @@ window.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', ()=>castSpell(i));
       spellsContainer.appendChild(btn);
     });
+    document.removeEventListener('keydown',hotkeyHandler);
     document.addEventListener('keydown',hotkeyHandler);
+  }
+
+  // ==============================
+  // TURN MANAGEMENT & ENEMY ACTION
+  // ==============================
+  function nextTurn(){
+    if(checkBattleEnd()) return;
+    if(currentTurn==='hero'){
+      currentTurn='enemy';
+      attackBtn.disabled=true;
+      spellsContainer.querySelectorAll('button').forEach(b=>b.disabled=true);
+      setTimeout(enemyTurn,500);
+    }
+  }
+  function enemyTurn(){
+    if(enemy.hp<=0||hero.hp<=0) return;
+    let dmg = getRandom(enemy.attackMin,enemy.attackMax);
+    let msg = '';
+    if(Math.random()<enemy.critChance){ dmg*=2; msg='👹 Enemy Critical! '; }
+    const dmgH = Math.max(0, dmg-hero.defense);
+    hero.hp = Math.max(0, hero.hp-dmgH);
+    playSfx('hit');
+    logEl.textContent = `${msg}Enemy dealt ${dmgH} damage.`;
+    updateUI();
+    if(!checkBattleEnd()){
+      currentTurn='hero';
+      attackBtn.disabled=false;
+      spellsContainer.querySelectorAll('button').forEach(b=>b.disabled=false);
+      logEl.textContent += ' Your turn!';
+    }
   }
 
   // ==============================
   // ATTACK HANDLER
   // ==============================
   attackBtn.addEventListener('click', ()=>{
+    if(currentTurn!=='hero'|| hero.hp<=0||enemy.hp<=0) return;
     playSfx('attack');
-    if(hero.hp<=0||enemy.hp<=0) return;
-
     let dmgE = getRandom(hero.attackMin,hero.attackMax);
     if(Math.random()<hero.critChance){
-      dmgE*=2;
-      logEl.textContent='💥 Hero Critical! ';
-    } else logEl.textContent='';
-
-    enemy.hp=Math.max(0,enemy.hp-dmgE);
-    playSfx('hit');
-
-    let rawDmgH=getRandom(enemy.attackMin,enemy.attackMax);
-    if(Math.random()<enemy.critChance){
-      rawDmgH*=2;
-      logEl.textContent+='👹 Enemy Critical! ';
+      dmgE*=2; logEl.textContent='💥 Hero Critical! ';
+    } else {
+      logEl.textContent='';
     }
-    const dmgH=Math.max(0,rawDmgH-hero.defense);
-    hero.hp=Math.max(0,hero.hp-dmgH);
+    enemy.hp = Math.max(0, enemy.hp-dmgE);
     playSfx('hit');
-
-    logEl.textContent+=`You dealt ${dmgE}, took ${dmgH}.`;
+    logEl.textContent+=`You dealt ${dmgE}.`;
     updateUI();
-    checkBattleEnd();
+    nextTurn();
   });
 
   // ==============================
   // CAST SPELL
   // ==============================
   function castSpell(i){
+    if(currentTurn!=='hero'|| hero.hp<=0||enemy.hp<=0) return;
     playSfx('spell');
-    if(hero.hp<=0||enemy.hp<=0) return;
-    const sp=hero.spells[i];
+    const sp = hero.spells[i];
     if(sp.cost>hero.mana){
       logEl.textContent='⚠️ Not enough Mana!';
       return;
     }
-    hero.mana-=sp.cost;
+    hero.mana -= sp.cost;
     if(sp.type==='damage'){
-      const d=getRandom(sp.min,sp.max);
-      enemy.hp=Math.max(0,enemy.hp-d);
+      const d = getRandom(sp.min,sp.max);
+      enemy.hp = Math.max(0, enemy.hp-d);
       logEl.textContent=`${sp.msg} (-${d} HP, -${sp.cost} MP)`;
     } else if(sp.type==='heal'){
-      hero.hp=Math.min(hero.maxHp,hero.hp+sp.amount);
+      hero.hp = Math.min(hero.maxHp, hero.hp+sp.amount);
       logEl.textContent=`${sp.msg} (+${sp.amount} HP, -${sp.cost} MP)`;
     } else {
-      enemy.hp=Math.max(0,enemy.hp-sp.amount);
-      hero.hp=Math.min(hero.maxHp,hero.hp+sp.amount);
+      enemy.hp = Math.max(0, enemy.hp-sp.amount);
+      hero.hp = Math.min(hero.maxHp, hero.hp+sp.amount);
       logEl.textContent=`${sp.msg} (drain ${sp.amount}, -${sp.cost} MP)`;
     }
     updateUI();
-    if(enemy.hp>0){
-      let raw=getRandom(enemy.attackMin,enemy.attackMax);
-      if(Math.random()<enemy.critChance) raw*=2;
-      const dh=Math.max(0,raw-hero.defense);
-      hero.hp=Math.max(0,hero.hp-dh);
-      logEl.textContent+=` Counter: ${dh}.`;
-      updateUI();
-    }
-    checkBattleEnd();
+    nextTurn();
   }
 
   // ==============================
   // BATTLE END & LEVEL UP
   // ==============================
   function checkBattleEnd(){
-    if(enemy.hp === 0){
+    if(enemy.hp===0){
       playSfx('levelUp');
-      const xpGain = Math.floor(enemy.xpReward * (1 + hero.xpGainBonus));
+      const xpGain = Math.floor(enemy.xpReward*(1+hero.xpGainBonus));
       hero.xp += xpGain;
       logEl.textContent += ` 🎉 Defeated Level ${enemy.level} ${enemy.name}! +${xpGain} XP`;
-
-      let leveled = false;
-      while(hero.xp >= hero.xpToNext){
+      let leveled=false;
+      while(hero.xp>=hero.xpToNext){
         playSfx('levelUp');
         hero.xp -= hero.xpToNext;
         hero.level++; hero.skillPoints++;
-        hero.maxHp += 20; hero.hp = hero.maxHp;
-        hero.attackMin += 2; hero.attackMax += 2;
-        hero.xpToNext = Math.floor(hero.xpToNext * 1.5);
+        hero.maxHp +=20; hero.hp = hero.maxHp;
+        hero.attackMin+=2; hero.attackMax+=2;
+        hero.xpToNext = Math.floor(hero.xpToNext*1.5);
         logEl.textContent += ` 🎊 Level ${hero.level}!`;
-        leveled = true;
+        leveled=true;
       }
       updateUI();
-
-      // stash loot until after picks
-      pendingLoot = lootPool[Math.floor(Math.random() * lootPool.length)];
-
+      pendingLoot = lootPool[Math.floor(Math.random()*lootPool.length)];
       if(leveled){
         showSkillAllocation();
       } else {
         showLootPick(pendingLoot);
         pendingLoot = null;
       }
-
-    } else if(hero.hp === 0){
+      return true;
+    } else if(hero.hp===0){
       playSfx('death');
       logEl.textContent += ' 💀 You died!';
-      attackBtn.disabled = true;
+      attackBtn.disabled=true;
       document.removeEventListener('keydown',hotkeyHandler);
+      return true;
     }
+    return false;
   }
 
   // ==============================
   // LOOT PICK OVERLAY
   // ==============================
-  function showLootPick(item) {
-    attackBtn.disabled = true;
+  function showLootPick(item){
+    attackBtn.disabled=true;
     const overlay = document.createElement('div');
-    overlay.id = 'loot-overlay';
-    Object.assign(overlay.style, {
-      position:'fixed', inset:0, background:'#000b',
-      display:'flex', alignItems:'center', justifyContent:'center', zIndex:10000
+    overlay.id='loot-overlay';
+    Object.assign(overlay.style,{
+      position:'fixed',inset:0,background:'#000b',
+      display:'flex',alignItems:'center',justifyContent:'center',zIndex:10000
     });
     overlay.innerHTML = `
       <div style="background:#1e1e1e;padding:20px;border-radius:8px;color:#eee;max-width:300px;text-align:center">
@@ -507,22 +521,15 @@ window.addEventListener('DOMContentLoaded', () => {
         <button id="loot-skip">Skip</button>
       </div>`;
     document.body.appendChild(overlay);
-
-    document.getElementById('loot-equip').addEventListener('click', () => {
-      playSfx('click');
-      equipItem(item.slot, item);
-      close();
+    document.getElementById('loot-equip').addEventListener('click',()=>{
+      playSfx('click'); equipItem(item.slot,item); close();
     });
-    document.getElementById('loot-skip').addEventListener('click', () => {
-      playSfx('click');
-      close();
+    document.getElementById('loot-skip').addEventListener('click',()=>{
+      playSfx('click'); close();
     });
     function close(){
       document.body.removeChild(overlay);
-      setTimeout(() => {
-        spawnEnemy();
-        attackBtn.disabled = false;
-      }, 600);
+      setTimeout(spawnEnemy,600);
     }
   }
 
@@ -530,30 +537,25 @@ window.addEventListener('DOMContentLoaded', () => {
   // SKILL ALLOCATION OVERLAY
   // ==============================
   function showSkillAllocation(){
-    attackBtn.disabled = true;
+    attackBtn.disabled=true;
     document.removeEventListener('keydown',hotkeyHandler);
-
-    // build overlay
     const overlay = document.createElement('div');
-    overlay.id = 'skill-overlay';
+    overlay.id='skill-overlay';
     Object.assign(overlay.style,{
-      position:'fixed', inset:0, background:'#000',
-      display:'flex', alignItems:'center', justifyContent:'center',
-      zIndex:10000
+      position:'fixed',inset:0,background:'#000',
+      display:'flex',alignItems:'center',justifyContent:'center',zIndex:10000
     });
-
-    let html = `<div id="skill-box" style="background:#1e1e1e;padding:20px;border-radius:8px;color:#eee;max-width:400px">
-        <h3>Use SP (<span id="rem-sp">${hero.skillPoints}</span>)</h3>
-        <ul style="list-style:none;padding:0">`;
+    let html = `<div style="background:#1e1e1e;padding:20px;border-radius:8px;color:#eee;max-width:400px">
+        <h3>Use SP (<span id="rem-sp">${hero.skillPoints}</span>)</h3><ul style="list-style:none;padding:0">`;
     skillDefinitions.forEach((sd,i)=>{
-      html += `<li style="margin:8px 0">
+      html+=`<li style="margin:8px 0">
         <strong>${sd.name}</strong> — <em>${sd.desc}</em><br>
         <span id="lvl-${i}">${hero.skills[sd.name]||0}</span>
         <button id="plus-${i}"${hero.skillPoints===0?' disabled':''}>+</button>
       </li>`;
     });
-    html += `</ul><button id="auto-btn">Auto-Allocate</button> <button id="ok-btn">OK</button></div>`;
-    overlay.innerHTML = html;
+    html+=`</ul><button id="auto-btn">Auto-Allocate</button> <button id="ok-btn">OK</button></div>`;
+    overlay.innerHTML=html;
     document.body.appendChild(overlay);
 
     skillDefinitions.forEach((sd,i)=>{
@@ -561,13 +563,12 @@ window.addEventListener('DOMContentLoaded', () => {
         playSfx('click');
         if(hero.skillPoints>0){
           hero.skillPoints--;
-          hero.skills[sd.name] = (hero.skills[sd.name]||0) + 1;
+          hero.skills[sd.name]=(hero.skills[sd.name]||0)+1;
           sd.apply();
-          document.getElementById(`lvl-${i}`).textContent = hero.skills[sd.name];
-          document.getElementById('rem-sp').textContent = hero.skillPoints;
-          if(hero.skillPoints===0){
-            document.querySelectorAll("[id^='plus-']").forEach(b=>b.disabled = true);
-          }
+          document.getElementById(`lvl-${i}`).textContent=hero.skills[sd.name];
+          document.getElementById('rem-sp').textContent=hero.skillPoints;
+          if(hero.skillPoints===0)
+            document.querySelectorAll("[id^='plus-']").forEach(b=>b.disabled=true);
         }
       });
     });
@@ -575,14 +576,14 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('auto-btn').addEventListener('click',()=>{
       playSfx('click');
       const top = autoPriorities[hero.className][0];
-      const sd = skillDefinitions.find(s=>s.name===top);
+      const sd  = skillDefinitions.find(s=>s.name===top);
       while(hero.skillPoints>0){
         hero.skillPoints--;
-        hero.skills[top] = (hero.skills[top]||0)+1;
+        hero.skills[top]=(hero.skills[top]||0)+1;
         sd.apply();
       }
-      document.getElementById(`lvl-${skillDefinitions.indexOf(sd)}`).textContent = hero.skills[top];
-      document.getElementById('rem-sp').textContent = hero.skillPoints;
+      document.getElementById(`lvl-${skillDefinitions.indexOf(sd)}`).textContent=hero.skills[top];
+      document.getElementById('rem-sp').textContent=hero.skillPoints;
       document.querySelectorAll("[id^='plus-']").forEach(b=>b.disabled=true);
     });
 
@@ -593,12 +594,9 @@ window.addEventListener('DOMContentLoaded', () => {
       if(hasSpells){
         showSpellPick();
       } else {
-        attackBtn.disabled = false;
+        attackBtn.disabled=false;
         setTimeout(spawnEnemy,600);
-        if(pendingLoot){
-          showLootPick(pendingLoot);
-          pendingLoot = null;
-        }
+        if(pendingLoot){ showLootPick(pendingLoot); pendingLoot=null; }
       }
     });
   }
@@ -607,52 +605,43 @@ window.addEventListener('DOMContentLoaded', () => {
   // SPELL PICK OVERLAY
   // ==============================
   function showSpellPick(){
-    attackBtn.disabled = true;
+    attackBtn.disabled=true;
     document.removeEventListener('keydown',hotkeyHandler);
-
     const overlay = document.createElement('div');
-    overlay.id = 'spell-pick';
+    overlay.id='spell-pick';
     Object.assign(overlay.style,{
-      position:'fixed', inset:0, background:'#000',
-      display:'flex', alignItems:'center', justifyContent:'center',
-      zIndex:10000
+      position:'fixed',inset:0,background:'#000',
+      display:'flex',alignItems:'center',justifyContent:'center',zIndex:10000
     });
-
-    const available = spellsList[hero.className] || [];
-    let html = `<div id="spell-box" style="background:#1e1e1e;padding:20px;border-radius:8px;color:#eee;max-width:400px">
+    const available = spellsList[hero.className]||[];
+    let html = `<div style="background:#1e1e1e;padding:20px;border-radius:8px;color:#eee;max-width:400px">
         <h3>Learn a New Spell</h3><ul style="list-style:none;padding:0">`;
-
     available.filter(sp=>!hero.spells.find(s=>s.name===sp.name)).forEach((sp,i)=>{
-      html += `<li style="margin:8px 0"><button data-i="${i}">${sp.name} (${sp.cost} MP)</button></li>`;
+      html+=`<li style="margin:8px 0"><button data-i="${i}">${sp.name} (${sp.cost} MP)</button></li>`;
     });
-    html += `</ul><button id="skip-spell">Skip</button></div>`;
-    overlay.innerHTML = html;
+    html+=`</ul><button id="skip-spell">Skip</button></div>`;
+    overlay.innerHTML=html;
     document.body.appendChild(overlay);
 
     overlay.querySelectorAll('button[data-i]').forEach(btn=>{
-      btn.addEventListener('click', e=>{
+      btn.addEventListener('click',e=>{
         playSfx('click');
-        const idx = +e.currentTarget.dataset.i;
+        const idx=+e.currentTarget.dataset.i;
         hero.spells.push(available[idx]);
         closePick();
       });
     });
     document.getElementById('skip-spell').addEventListener('click',()=>{
-      playSfx('click');
-      closePick();
+      playSfx('click'); closePick();
     });
 
     function closePick(){
       document.body.removeChild(overlay);
-      attackBtn.disabled = false;
+      attackBtn.disabled=false;
       createSpellButtons();
       setTimeout(spawnEnemy,600);
       document.addEventListener('keydown',hotkeyHandler);
-
-      if(pendingLoot){
-        showLootPick(pendingLoot);
-        pendingLoot = null;
-      }
+      if(pendingLoot){ showLootPick(pendingLoot); pendingLoot=null; }
     }
   }
 
@@ -671,32 +660,43 @@ window.addEventListener('DOMContentLoaded', () => {
     core.querySelector('p:nth-of-type(6)').innerHTML = `<strong>Crit %:</strong> ${Math.round(hero.critChance*100)}%`;
   }
 
+  // ==============================
+  // CHARACTER SHEET BUTTON
+  // ==============================
   charSheetBtn.addEventListener('click',()=>{
     playSfx('click');
-    attackBtn.disabled = true;
+    attackBtn.disabled=true;
     document.removeEventListener('keydown',hotkeyHandler);
 
-    const overlay = document.createElement('div');
-    overlay.id = 'char-sheet-overlay';
-    Object.assign(overlay.style,{
-      position:'fixed', inset:0, background:'#000',
-      display:'flex', alignItems:'center', justifyContent:'center',
-      zIndex:2000
-    });
-let gearHtml = `
-  <section class="sheet-section gear"><h3>Gear</h3>
+    // build gear section
+    const gearHtml = `
+  <section class="sheet-section gear">
+    <h3>Gear</h3>
     <div class="gear-container">
-      <img src="clip-art/gear.png" alt="gear slots" style="max-width:200px;opacity:0.8;">
-      ${gearSlots.map(slot=>`
+      <img src="clip-art/gear.png" alt="gear slots">
+      ${gearSlots.map(slot => `
         <button class="gear-slot" data-slot="${slot}">
           ${hero.gear[slot]?.name || slot.charAt(0).toUpperCase()+slot.slice(1)}
-        </button>`).join('')}
+        </button>
+      `).join('')}
     </div>
   </section>`;
 
-    overlay.innerHTML = `<div class="sheet-container"><header class="sheet-header">
-          <h2>${hero.name} the ${hero.className}</h2></header><div class="sheet-content">
-          <section class="sheet-section core"><h3>Core Stats</h3>
+    // inject all four panels into one .sheet-content
+    const overlay = document.createElement('div');
+    overlay.id='char-sheet-overlay';
+    Object.assign(overlay.style,{
+      position:'fixed',inset:0,background:'#000',
+      display:'flex',alignItems:'center',justifyContent:'center',zIndex:2000
+    });
+    overlay.innerHTML = `
+      <div class="sheet-container">
+        <header class="sheet-header">
+          <h2>${hero.name} the ${hero.className}</h2>
+        </header>
+        <div class="sheet-content">
+          <section class="sheet-section core">
+            <h3>Core Stats</h3>
             <p><strong>Level:</strong> ${hero.level}</p>
             <p><strong>XP:</strong> ${hero.xp} / ${hero.xpToNext}</p>
             <p><strong>HP:</strong> ${hero.hp} / ${hero.maxHp}</p>
@@ -705,17 +705,26 @@ let gearHtml = `
             <p><strong>Crit %:</strong> ${Math.round(hero.critChance*100)}%</p>
             <p><strong>SP:</strong> ${hero.skillPoints}</p>
           </section>
-          <section class="sheet-section skills"><h3>Skills</h3><ul>
-            ${skillDefinitions.map(sd=>`<li><strong>${sd.name}:</strong> ${hero.skills[sd.name]||0}</li>`).join('')}
-          </ul></section>
-          <section class="sheet-section spells"><h3>Spells</h3><ul>
-            ${hero.spells.map(sp=>`<li>${sp.name} <span class="spell-cost">(${sp.cost} MP)</span></li>`).join('')}
-          </ul></section>
+          <section class="sheet-section skills">
+            <h3>Skills</h3>
+            <ul>
+              ${skillDefinitions.map(sd=>`<li><strong>${sd.name}:</strong> ${hero.skills[sd.name]||0}</li>`).join('')}
+            </ul>
+          </section>
+          <section class="sheet-section spells">
+            <h3>Spells</h3>
+            <ul>
+              ${hero.spells.map(sp=>`<li>${sp.name} <span class="spell-cost">(${sp.cost} MP)</span></li>`).join('')}
+            </ul>
+          </section>
           ${gearHtml}
-        </div><button id="close-char-sheet">Close</button></div>`;
+        </div>
+        <button id="close-char-sheet">Close</button>
+      </div>`;
 
     document.body.appendChild(overlay);
 
+    // bind gear-slot clicks
     document.querySelectorAll('.gear-slot').forEach(btn=>{
       btn.addEventListener('click', e=>{
         const slot = e.currentTarget.dataset.slot;
@@ -724,10 +733,11 @@ let gearHtml = `
       });
     });
 
+    // close handler
     document.getElementById('close-char-sheet').addEventListener('click',()=>{
       playSfx('click');
       document.body.removeChild(overlay);
-      attackBtn.disabled = false;
+      attackBtn.disabled=false;
       createSpellButtons();
       document.addEventListener('keydown',hotkeyHandler);
     });
@@ -739,45 +749,44 @@ let gearHtml = `
   function showSlotOverlay(type){
     playSfx('click');
     const overlay = document.createElement('div');
-    overlay.id = 'slot-overlay';
+    overlay.id='slot-overlay';
     Object.assign(overlay.style,{
-      position:'fixed', inset:0, background:'#000',
-      display:'flex', alignItems:'center', justifyContent:'center',
-      zIndex:2000
+      position:'fixed',inset:0,background:'#000',
+      display:'flex',alignItems:'center',justifyContent:'center',zIndex:2000
     });
-    let html = `<div style="background:#1e1e1e;padding:20px;border-radius:8px;color:#eee;max-width:300px">
+    let html=`<div style="background:#1e1e1e;padding:20px;border-radius:8px;color:#eee;max-width:300px">
         <h3>${type==='save'?'Save':'Load'} Slot</h3><ul style="list-style:none;padding:0">`;
     for(let i=1;i<=3;i++){
       const key=`rpg_slot${i}`, raw=localStorage.getItem(key);
-      let label=`Slot ${i}`;
+      let lbl=`Slot ${i}`;
       if(type==='load'&&raw){
         const h=JSON.parse(raw);
-        label=`${h.name}_${h.className}_Lv${h.level}`;
+        lbl=`${h.name}_${h.className}_Lv${h.level}`;
       }
-      html += `<li style="margin:8px 0"><button data-slot="${i}">${label}</button></li>`;
+      html+=`<li style="margin:8px 0"><button data-slot="${i}">${lbl}</button></li>`;
     }
-    html += `</ul><button id="slot-cancel">Cancel</button></div>`;
-    overlay.innerHTML = html;
+    html+=`</ul><button id="slot-cancel">Cancel</button></div>`;
+    overlay.innerHTML=html;
     document.body.appendChild(overlay);
 
     overlay.querySelectorAll('button[data-slot]').forEach(btn=>{
       btn.addEventListener('click', e=>{
         playSfx('click');
-        const slot = e.currentTarget.dataset.slot;
-        const key  = `rpg_slot${slot}`;
-        const raw  = localStorage.getItem(key);
+        const slot=e.currentTarget.dataset.slot;
+        const key=`rpg_slot${slot}`;
+        const raw=localStorage.getItem(key);
         if(type==='save'){
           localStorage.setItem(key,JSON.stringify(hero));
-          logEl.textContent = `💾 Saved to ${hero.name}_${hero.className}_Lv${hero.level}`;
+          logEl.textContent=`💾 Saved to ${hero.name}_${hero.className}_Lv${hero.level}`;
         } else if(raw){
-          hero = JSON.parse(raw);
-          mainMenu.style.display = 'none';
-          creationArea.style.display = 'none';
-          battleSection.style.display = 'block';
+          hero=JSON.parse(raw);
+          mainMenu.style.display='none';
+          creationArea.style.display='none';
+          battleSection.style.display='block';
           beginBattle();
-          logEl.textContent = `📂 Loaded ${hero.name}_${hero.className}_Lv${hero.level}`;
+          logEl.textContent=`📂 Loaded ${hero.name}_${hero.className}_Lv${hero.level}`;
         } else {
-          logEl.textContent = '⚠️ Empty Slot';
+          logEl.textContent='⚠️ Empty Slot';
         }
         document.body.removeChild(overlay);
       });
@@ -806,11 +815,11 @@ let gearHtml = `
   // ==============================
   startBtn.addEventListener('click',()=>{
     playSfx('click');
-    const name  = heroNameInput.value.trim();
+    const name = heroNameInput.value.trim();
     if(!name){ alert('Enter a name'); return; }
-    const race  = raceSelect.value;
-    const cls   = classSelect.value;
-    const base  = classData[cls];
+    const race = raceSelect.value;
+    const cls  = classSelect.value;
+    const base = classData[cls];
 
     hero = {
       name, className:cls,
@@ -833,9 +842,9 @@ let gearHtml = `
 
     hero.spells = (spellsList[cls]||[]).slice(0,3);
 
-    mainMenu.style.display     = 'none';
-    creationArea.style.display = 'none';
-    battleSection.style.display= 'block';
+    mainMenu.style.display='none';
+    creationArea.style.display='none';
+    battleSection.style.display='block';
     beginBattle();
   });
 
@@ -843,7 +852,7 @@ let gearHtml = `
   // BEGIN BATTLE
   // ==============================
   function beginBattle(){
-    spellsContainer.innerHTML = '';
+    spellsContainer.innerHTML='';
     document.removeEventListener('keydown',hotkeyHandler);
     createSpellButtons();
     spawnEnemy();
@@ -851,3 +860,4 @@ let gearHtml = `
   }
 
 });
+
