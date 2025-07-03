@@ -477,3 +477,45 @@ html, body {
   width: 100%;
   height: 100%;
 }
+*─────────────────────────────────*
+ *  MOBILE SCALING (phones/tablet)
+ *─────────────────────────────────*/
+@media (max-width: 600px) {
+  /* shrink base font so everything scales */
+  html { font-size: 0.85rem; }
+  
+  /* panels full-width with smaller padding */
+  .panel,
+  #creation-area,
+  .sheet-container,
+  .slot-container {
+    width: 95%;
+    margin: 1rem auto;
+    padding: 1rem;
+  }
+
+  /* tighter gaps */
+  .sheet-content,
+  .battle-content {
+    gap: 1rem;
+  }
+
+  /* shrink headers */
+  .overlay h1 { font-size: 2rem; }
+  .overlay h2,
+  .battle-header h2,
+  .sheet-header h2 { font-size: 1.5rem; }
+
+  /* smaller inputs & buttons */
+  button,
+  input,
+  select {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* reduce min-width on sheet sections to fit 2-per-row if needed */
+  .sheet-section {
+    min-width: 140px;
+  }
+}
