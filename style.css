@@ -600,17 +600,28 @@ button:active {
   background: var(--btn-hover);
 }
 /* ─── GEAR SLOT UI ─── */
+.sheet-section.gear {
+  flex: 1;              /* match your other .sheet-section panels */
+  min-width: 200px;     /* same min-width as core/skills/spells */
+  display: flex;        /* allow centering inside */
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;        /* match other panels’ padding */
+}
+
+/* Let the outline & slots fill the panel, not overflow it */
 .gear-container {
   position: relative;
-  width: 200px;
-  height: 300px;
-  margin: auto;
+  width: 100%;          /* full width of the panel */
+  /* height: auto — remove any fixed height so it scales */
+  margin-top: 0.5rem;   /* small gap under the <h3> */
 }
+
+/* Scale the silhouette to fit the panel’s width */
 .gear-container img {
-  display: block;
   width: 100%;
   height: auto;
-  opacity: 0.3;
+  opacity: 0.8;         /* or whatever translucency you prefer */
 }
 /* slot buttons positioned absolutely over the outline */
 .gear-slot {
