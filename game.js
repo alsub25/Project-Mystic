@@ -218,6 +218,11 @@ window.addEventListener('DOMContentLoaded', () => {
   // ==============================
   const sfx = {
     click:    new Audio('sfx/click.wav'),
+    attack:   new Audio('sfx/attack.wav'),
+    hit:      new Audio('sfx/hit.wav'),
+    spell:    new Audio('sfx/spell.wav'),
+    levelUp:  new Audio('sfx/levelUp.wav'),
+    death:    new Audio('sfx/death.wav')
   };
 
   bgm.volume = optMusicVol.value / 100;
