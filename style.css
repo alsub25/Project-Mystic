@@ -1,0 +1,753 @@
+/*────────────────────────────────────────────────────────────*
+ *  Modern–Pixel RPG Aesthetic & Spacing                    
+ *────────────────────────────────────────────────────────────*/
+
+:root {
+  --bg: #0b0c1a;
+  --panel-bg: rgba(20,20,40,0.95);
+  --accent: #ff9f1c;
+  --btn: #5b60f6;
+  --btn-hover: #3e44c8;
+  --font-title: 'Cinzel Decorative', serif;
+  --font-ui: 'Press Start 2P', cursive;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: #eee;
+  font-family: var(--font-ui);
+  overflow: hidden;
+}
+
+/* OPAQUE OVERLAYS */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 100;
+}
+
+/* Main Menu */
+.overlay h1 {
+  font-family: var(--font-title);
+  font-size: 3rem;
+  color: var(--accent);
+  margin-bottom: 2rem;
+  text-shadow: 0 0 8px var(--accent);
+}
+.main-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Options Overlay */
+.overlay h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+.option-row {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+.overlay label {
+  font-size: 0.9rem;
+}
+.overlay select {
+  margin-left: 0.5rem;
+  transform: scale(1.1);
+}
+.overlay button {
+  min-width: 160px;
+}
+
+/* Panels */
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 2rem auto;
+  max-width: 900px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.7);
+}
+
+/* Inputs & Random-Name Button */
+label {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+input, select {
+  width: 100%;
+  background: #1a1a2e;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 0.6rem;
+  color: #eee;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+}
+input::placeholder {
+  color: #666;
+}
+
+.small-btn {
+  margin-bottom: 1.5rem;
+  background: var(--btn);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* Buttons */
+button {
+  background: var(--btn);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+button:hover {
+  background: var(--btn-hover);
+  transform: translateY(-2px);
+}
+button:active {
+  transform: translateY(0);
+}
+
+/* In-game Menu Dropdown */
+.options-container {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+}
+#options-panel {
+  position: absolute;
+  top: 120%;
+  left: 0;
+  background: var(--panel-bg);
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 0.75rem;
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease 0.3s, visibility 0s linear 0.3s;
+}
+.options-container:hover #options-panel,
+.options-container:focus-within #options-panel {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+#options-panel button {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.6rem;
+  text-align: left;
+}
+
+/* Battle Header */
+.battle-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.battle-header h2 {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent);
+}
+
+/* Battle Content (3-column layout) */
+.battle-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+/* Stats Groups */
+.stats-group {
+  flex: 1;
+  min-width: 180px;
+}
+.stats-group h3 {
+  font-family: var(--font-title);
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+  text-shadow: 0 0 4px var(--accent);
+}
+.stats-group p {
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* Controls & Spells Center */
+.controls-group {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.main-buttons {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+.spells-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Bars */
+.bar-container {
+  background: #111;
+  border-radius: 4px;
+  overflow: hidden;
+  height: 14px;
+  margin-bottom: 0.6rem;
+}
+.bar-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+.bar-fill.hp    { background: #e74c3c; }
+.bar-fill.xp    { background: #f1c40f; }
+.bar-fill.mana  { background: #3498db; }
+.bar-fill.enemy { background: #c0392b; }
+
+/* Log */
+.log {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 1rem;
+  font-size: 0.75rem;
+  height: 120px;
+  overflow-y: auto;
+}
+
+/* Character Sheet Overlay & Save/Load Slot Overlay */
+#char-sheet-overlay,
+#slot-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  z-index: 2000;
+}
+
+/* Shared container for sheet or slots */
+.sheet-container,
+.slot-container {
+  background: rgba(20,20,40,0.95);
+  border: 2px solid #444;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;  /* we'll override this below */
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+}
+
+/* CHARACTER SHEET: expand to fit four columns */
+.sheet-container {
+  max-width: 1100px;  /* increased from 900px */
+  width: 95%;
+}
+
+/* Sheet Header */
+.sheet-header {
+  text-align: center;
+  margin: 1rem 0;
+}
+.sheet-header h2 {
+  font-family: var(--font-title);
+  font-size: 2.2rem;
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent);
+}
+
+/* Sheet Content: allow wrapping */
+.sheet-content {
+  display: flex;
+  flex-wrap: wrap;       /* allow gear section to wrap */
+  gap: 2rem;
+  justify-content: center;
+  padding: 0 1rem 1rem;
+}
+
+/* Individual sections */
+.sheet-section {
+  flex: 1;
+  min-width: 180px;      /* reduced so four can fit */
+  background: rgba(30,30,60,0.9);
+  border-radius: 8px;
+  padding: 1rem;
+}
+.sheet-section h3 {
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  color: var(--btn);
+  border-bottom: 1px solid var(--btn);
+  padding-bottom: 0.2rem;
+}
+.sheet-section p,
+.sheet-section li {
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+.sheet-section ul {
+  list-style: none;
+  padding-left: 0;
+}
+.sheet-section.skills li::before {
+  content: "★";
+  color: var(--accent);
+  margin-right: 0.5rem;
+}
+.sheet-section.spells li::before {
+  content: "⚡";
+  color: #3498db;
+  margin-right: 0.5rem;
+}
+.spell-cost {
+  color: #aaa;
+  font-size: 0.75rem;
+}
+
+/* Close Button */
+#close-char-sheet {
+  align-self: center;
+  margin: 1rem 0;
+  background: var(--btn);
+  padding: 0.8rem 2rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+#close-char-sheet:hover {
+  background: var(--btn-hover);
+}
+
+/* Save/Load Slot Buttons */
+#slot-overlay > div {
+  max-width: 300px;
+  padding: 20px;
+  text-align: center;
+}
+#slot-overlay h3 {
+  margin-bottom: 1rem;
+}
+#slot-overlay ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+#slot-overlay li {
+  margin: 0.5rem 0;
+}
+#slot-overlay button {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+#slot-cancel {
+  margin-top: 0.5rem;
+}
+/* In-game Menu Dropdown */
+.options-container {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+}
+#options-panel {
+  position: absolute;
+  top: 120%;
+  left: 0;
+  background: var(--panel-bg);
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 0.75rem;
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease 0.3s, visibility 0s linear 0.3s;
+}
+.options-container:hover #options-panel,
+.options-container:focus-within #options-panel {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+#options-panel button {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.6rem;
+  text-align: left;
+}
+
+/* Battle Header */
+.battle-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.battle-header h2 {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent);
+}
+
+/* Battle Content (3-column layout) */
+.battle-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+/* Stats Groups */
+.stats-group {
+  flex: 1;
+  min-width: 180px;
+}
+.stats-group h3 {
+  font-family: var(--font-title);
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+  text-shadow: 0 0 4px var(--accent);
+}
+.stats-group p {
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* Controls & Spells Center */
+.controls-group {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.main-buttons {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+.spells-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Bars */
+.bar-container {
+  background: #111;
+  border-radius: 4px;
+  overflow: hidden;
+  height: 14px;
+  margin-bottom: 0.6rem;
+}
+.bar-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+.bar-fill.hp    { background: #e74c3c; }
+.bar-fill.xp    { background: #f1c40f; }
+.bar-fill.mana  { background: #3498db; }
+.bar-fill.enemy { background: #c0392b; }
+
+/* Log */
+.log {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 1rem;
+  font-size: 0.75rem;
+  /* height and overflow managed below */
+}
+
+/* Character Sheet Overlay & Save/Load Slot Overlay */
+#char-sheet-overlay,
+#slot-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000; /* fully opaque black */
+  z-index: 2000;
+}
+
+/* Shared container for sheet or slots */
+.sheet-container,
+.slot-container {
+  background: rgba(20,20,40,0.95);
+  border: 2px solid #444;
+  border-radius: 12px;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  /* sizing managed below */
+}
+
+/* Character Sheet specifics */
+.sheet-header {
+  text-align: center;
+  margin: 1rem 0;
+}
+.sheet-header h2 {
+  font-family: var(--font-title);
+  font-size: 2.2rem;
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent);
+}
+.sheet-content {
+  display: flex;
+  gap: 2rem;
+  padding: 0 1rem 1rem;
+}
+.sheet-section {
+  flex: 1;
+  background: rgba(30,30,60,0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  min-width: 200px;
+}
+.sheet-section h3 {
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  color: var(--btn);
+  border-bottom: 1px solid var(--btn);
+  padding-bottom: 0.2rem;
+}
+.sheet-section p,
+.sheet-section li {
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+.sheet-section ul {
+  list-style: none;
+  padding-left: 0;
+}
+.sheet-section.skills li::before {
+  content: "★";
+  color: var(--accent);
+  margin-right: 0.5rem;
+}
+.sheet-section.spells li::before {
+  content: "⚡";
+  color: #3498db;
+  margin-right: 0.5rem;
+}
+.spell-cost {
+  color: #aaa;
+  font-size: 0.75rem;
+}
+#close-char-sheet {
+  align-self: center;
+  margin: 1rem 0;
+  background: var(--btn);
+  padding: 0.8rem 2rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+#close-char-sheet:hover {
+  background: var(--btn-hover);
+}
+/* ─── GEAR SLOT UI ─── */
+.gear-container {
+  position: relative;
+  width: 200px;
+  height: 300px;
+  margin: auto;
+}
+.gear-container img {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0.3;
+}
+/* slot buttons positioned absolutely over the outline */
+.gear-slot {
+  position: absolute;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  padding: 0.2rem;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+/* tweak these percentages to match your outline graphic */
+.gear-slot[data-slot="helmet"]   { top:10%;  left:30%; width:40%; }
+.gear-slot[data-slot="chest"]    { top:35%;  left:25%; width:50%; }
+.gear-slot[data-slot="hands"]    { top:50%;  left:10%; width:30%; }
+.gear-slot[data-slot="feet"]     { top:75%;  left:30%; width:40%; }
+.gear-slot[data-slot="weapon"]   { top:50%;  left:65%; width:25%; }
+.gear-slot[data-slot="ring"]     { top:60%;  left:45%; width:15%; }
+.gear-slot[data-slot="necklace"] { top:20%;  left:40%; width:20%; }
+
+/* Save/Load Slot Buttons */
+#slot-overlay > div {
+  padding: 20px;
+  text-align: center;
+}
+#slot-overlay h3 {
+  margin-bottom: 1rem;
+}
+#slot-overlay ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+#slot-overlay li {
+  margin: 0.5rem 0;
+}
+#slot-overlay button {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+#slot-cancel {
+  margin-top: 0.5rem;
+}
+
+/*──────────────────────────────────────────────────*
+ *  CHARACTER CREATION SPACING TWEAKS               
+ *──────────────────────────────────────────────────*/
+
+/* Increase space below each label/input in creation form */
+#creation-area label {
+  margin-bottom: 1.5rem;
+}
+/* Extra gap under “Random Name” button */
+#creation-area .small-btn {
+  margin-bottom: 2rem;
+}
+/* Push “Create Hero” button away from last dropdown */
+#creation-area #start-btn {
+  display: inline-block; /* restore auto-sizing */
+  width: auto;
+  margin-top: 1.5rem;
+}
+
+/* More space between title and name field */
+#creation-area h2 {
+  margin-bottom: 2.5rem;
+}
+
+/*──────────────────────────────────────────────────*
+ *  REFINED RESPONSIVE PANELS & LAYOUT              
+ *──────────────────────────────────────────────────*/
+
+/* Only primary panels and overlays get fluid sizing */
+.panel,
+#creation-area,
+.sheet-container,
+.slot-container {
+  width: 90%;
+  max-width: 900px;
+  margin: 2rem auto;
+}
+
+/* Pad inner containers in overlays */
+#char-sheet-overlay .sheet-container,
+#slot-overlay > div {
+  padding: 1rem;
+}
+
+/* Battle layout stacks on narrow viewports */
+@media (max-width: 800px) {
+  .battle-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+/* Let the log grow/shrink with a cap */
+.log {
+  max-height: 30vh;
+  overflow-y: auto;
+  margin-top: 1rem;  /* adjust as needed to taste */
+}
+}
+
+/* Restore options dropdown natural sizing */
+.options-container {
+  width: auto;
+}
+#options-panel {
+  width: auto;
+  max-width: 300px;
+}
+#hero-mana-row,
+#hero-mana-bar-container {
+  display: none !important;
+}
+/*──────────────────────────────────────────────────*
+ *  RESPONSIVE SKILL & SPELL OVERLAYS               
+ *──────────────────────────────────────────────────*/
+
+#skill-overlay > div,
+#spell-pick > div {
+  width: 90%;
+  max-width: 400px;
+  margin: auto;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1rem;
+  background: var(--panel-bg);
+  border-radius: 8px;
+}
+
+/* Ensure full-viewport for html/body */
+html, body {
+  width: 100%;
+  height: 100%;
+}
