@@ -251,7 +251,6 @@ button:active {
   border-radius: 6px;
   padding: 1rem;
   font-size: 0.75rem;
-  /* height and overflow managed below */
 }
 
 /*──────────────────────────────────────────────────*
@@ -277,7 +276,7 @@ button:active {
   border: 2px solid #444;
   border-radius: 12px;
 
-  /* ↓ Viewport-relative sizing so it always fits ↓ */
+  /* Viewport-relative sizing so it always fits */
   width: 95vw;
   max-width: 1100px;
   max-height: 95vh;
@@ -309,7 +308,6 @@ button:active {
   justify-content: center;
   padding: 0 1rem 1rem;
 
-  /* take remaining space, scroll if content overflows */
   flex: 1 1 auto;
   overflow-y: auto;
 }
@@ -406,8 +404,8 @@ button:active {
 }
 
 .gear-container {
-  position: relative;  /* ← positioning context for the buttons */
-  margin: 0 auto;      
+  position: relative;
+  margin: 0 auto;
   width: 100%;
 }
 
@@ -417,7 +415,6 @@ button:active {
   opacity: 1.0;
 }
 
-/* slot buttons positioned absolutely over the outline */
 .gear-slot {
   position: absolute;
   background: rgba(0,0,0,0.6);
@@ -438,13 +435,52 @@ button:active {
 .gear-slot[data-slot="ring"]     { top:60%; left:45%; width:15%; }
 .gear-slot[data-slot="necklace"] { top:20%; left:40%; width:20%; }
 
+/*────────────────────────────────────────────────────────────*
+ *  Developer Menu Overlay & Panel                           
+ *────────────────────────────────────────────────────────────*/
+
+/* Developer menu overlay */
+#dev-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+/* Developer panel */
+#dev-menu {
+  background: var(--panel-bg);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 300px;
+  max-width: 90%;
+  text-align: center;
+}
+
+#dev-menu h3 {
+  font-family: var(--font-title);
+  color: var(--accent);
+  margin-bottom: 1rem;
+  text-shadow: 0 0 6px var(--accent);
+}
+
+#dev-menu button {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
 /*──────────────────────────────────────────────────*
  *  CHARACTER CREATION SPACING TWEAKS               
  *──────────────────────────────────────────────────*/
 
 #creation-area label      { margin-bottom: 1.5rem; }
 #creation-area .small-btn { margin-bottom: 2rem; }
-#creation-area #start-btn { display:inline-block; width:auto; margin-top: 1.5rem; }
+#creation-area #start-btn { display: inline-block; width: auto; margin-top: 1.5rem; }
 #creation-area h2        { margin-bottom: 2.5rem; }
 
 /*──────────────────────────────────────────────────*
@@ -477,14 +513,15 @@ html, body {
   width: 100%;
   height: 100%;
 }
-*─────────────────────────────────*
- *  MOBILE SCALING (phones/tablet)
- *─────────────────────────────────*/
+
+/*──────────────────────────────────────────────────*
+ *  MOBILE REFINEMENTS (phones/tablet)
+ *──────────────────────────────────────────────────*/
 @media (max-width: 600px) {
   /* shrink base font so everything scales */
   html { font-size: 0.85rem; }
-  
-  /* panels full-width with smaller padding */
+
+  /* full-width panels with tighter padding */
   .panel,
   #creation-area,
   .sheet-container,
@@ -494,14 +531,14 @@ html, body {
     padding: 1rem;
   }
 
-  /* tighter gaps */
+  /* tighten gaps */
   .sheet-content,
   .battle-content {
     gap: 1rem;
   }
 
   /* shrink headers */
-  .overlay h1 { font-size: 2rem; }
+  .overlay h1      { font-size: 2rem; }
   .overlay h2,
   .battle-header h2,
   .sheet-header h2 { font-size: 1.5rem; }
@@ -514,8 +551,260 @@ html, body {
     padding: 0.5rem 0.75rem;
   }
 
-  /* reduce min-width on sheet sections to fit 2-per-row if needed */
-  .sheet-section {
-    min-width: 140px;
+  /* make sheet panels two-per-row */
+  .sheet-content .sheet-section {
+    flex: 0 0 calc(50% - 1rem);
+    max-width: calc(50% - 1rem);
   }
+
+  /* ensure skill/spell overlays scale & scroll */
+  #skill-overlay > div,
+  #spell-pick > div {
+    width: 90%;
+    max-width: 90vw;
+    margin: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1rem;
+    background: var(--panel-bg);
+    border-radius: 8px;
+  }
+}
+
+/*──────────────────────────────────────────────────*
+ *  PHONE-UI OVERRIDES (applied when .phone-ui is on <body>)
+ *──────────────────────────────────────────────────*/
+
+body.phone-ui .options-container {
+  top: auto !important;
+  left: auto !important;
+  bottom: 1rem;
+  right: 1rem;
+}
+body.phone-ui #options-panel {
+  top: auto !important;
+  left: auto !important;
+  bottom: 100%;
+  right: 0;
+  transform-origin: bottom right;
+}
+body.phone-ui #char-sheet-overlay .sheet-container {
+  width: 98vw;
+  max-width: 98vw;
+  padding: 1.5rem;
+}
+body.phone-ui #char-sheet-overlay .sheet-content {
+  gap: 1.5rem;
+}
+body.phone-ui #char-sheet-overlay .sheet-section {
+  flex: 1 1 100%;
+  max-width: 100%;
+  min-width: 100%;
+  margin: 0.5rem 0;
+}
+body.phone-ui #skill-overlay {
+  overflow: visible; /* ensure the overlay itself doesn’t clip */
+}
+
+body.phone-ui #skill-overlay > div {
+  width: 98vw !important;       /* almost full screen width */
+  max-width: 98vw !important;
+  height: auto !important;      /* let content grow as needed */
+  max-height: none !important;  /* remove the old max-height limit */
+  overflow: visible !important; /* disable inner scrolling */
+  padding: 1.5rem !important;   /* give it a little more breathing room */
+}
+/*──────────────────────────────────────────────────*
+ *  PHONE-UI OVERRIDES (applied when .phone-ui is on <body>)
+ *──────────────────────────────────────────────────*/
+/* Center the in-game dropdown menu text */
+body.phone-ui #options-panel {
+  text-align: center;
+}
+body.phone-ui #options-panel button {
+  text-align: center;
+}
+/*──────────────────────────────────────────────────*
+ *  PHONE-UI LAYOUT: prevent overlap & enable dynamic scaling
+ *──────────────────────────────────────────────────*/
+body.phone-ui {
+  display: flex;
+  flex-direction: column;
+}
+
+/*──────────────────────────────────────────────────*
+ *  PHONE-UI LAYOUT UPDATE: fixed bottom-right menu, no overlap
+ *──────────────────────────────────────────────────*/
+body.phone-ui .options-container {
+  position: fixed !important;
+  bottom: 1rem !important;
+  right: 1rem !important;
+  left: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+  z-index: 999; /* above game area but below overlays */
+}
+
+/* Give the game area a bottom buffer so it never hides behind the menu */
+body.phone-ui #game-area {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 0 1rem 5rem; /* bottom padding ≥ menu height */
+  min-height: 0;        /* allow flex child to shrink & scroll */
+}
+
+/* Ensure your battle content (or any new panels) can scroll if very tall */
+body.phone-ui .battle-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  gap: 1rem;
+}
+/*──────────────────────────────────────────────────*
+ *  PHONE-UI: ensure overlays cover the fixed menu,
+ *  and make game-area flexible/scrollable
+ *──────────────────────────────────────────────────*/
+body.phone-ui .overlay {
+  /* put every full-screen overlay above the 999 z-index of the menu button */
+  z-index: 1000 !important;
+}
+
+body.phone-ui .options-container {
+  /* keep the ☰ Menu fixed at bottom-right under overlays */
+  z-index: 999 !important;
+}
+
+/* let the game-area flex and scroll internally */
+body.phone-ui #game-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  /* ensure content never hides beneath the menu button */
+  padding: 0 1rem 5rem;
+  min-height: 0;
+}
+body.phone-ui {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top:    env(safe-area-inset-top);
+  padding-left:   env(safe-area-inset-left);
+  padding-right:  env(safe-area-inset-right);
+}
+/*─────────────────────────────*
+ *  PHONE-UI ENHANCEMENTS      
+ *─────────────────────────────*/
+
+/* 0) MAIN MENU STAYS OPAQUE */
+body.phone-ui #main-menu.overlay {
+  background: #000 !important;
+  backdrop-filter: none !important;
+}
+
+/* 1) FROSTED BACKDROP FOR ALL OTHER OVERLAYS */
+body.phone-ui .overlay:not(#main-menu) {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+/* 2) SNAP-TO-GRID SCROLLING */
+body.phone-ui .battle-content,
+body.phone-ui .log {
+  scroll-snap-type: y mandatory;
+  overscroll-behavior: contain;
+}
+body.phone-ui .battle-content > *,
+body.phone-ui .log {
+  scroll-snap-align: start;
+}
+
+/* 3) SKELETON-LOADERS FOR SPELLS */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+body.phone-ui .spells-grid.loading button {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.05) 25%,
+    rgba(255,255,255,0.15) 50%,
+    rgba(255,255,255,0.05) 75%
+  ) no-repeat;
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  color: transparent;
+}
+
+/* 4) ORIENTATION-SPECIFIC BOTTOM NAV */
+@media (max-width:600px) and (orientation: landscape) {
+  body.phone-ui #bottom-nav {
+    height: 3.5rem;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: repeat(auto-fit, minmax(3.5rem,1fr));
+  }
+}
+
+/* 5) FOCUS-VISIBLE FOR ACCESSIBILITY */
+body.phone-ui #bottom-nav button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 6) VM HACK FOR IOS 100vh JUMP */
+:root { --vh: 1vh; }
+@media(max-width:600px){
+  body.phone-ui {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+
+
+/* 7) SMART BUTTON SIZING */
+body.phone-ui #bottom-nav button {
+  font-size: clamp(0.65rem, 2.5vw, 0.85rem);
+  padding: clamp(0.3rem, 1.5vw, 0.5rem);
+}
+
+/* 8) AUTO-HIDE NAV ON SCROLL */
+body.phone-ui #bottom-nav {
+  transition: transform 0.3s ease;
+  will-change: transform;
+}
+body.phone-ui.scrolling-down #bottom-nav {
+  transform: translateY(100%);
+}
+
+/* 9) RTL SUPPORT */
+body[dir="rtl"].phone-ui #bottom-nav {
+  direction: rtl;
+}
+
+/* 10) SYSTEM DARK/LIGHT SWITCH */
+@media (prefers-color-scheme: light) {
+  body.phone-ui {
+    --bg: #f5f5f5;
+    --panel-bg: rgba(255,255,255,0.85);
+    --accent: #ff9f1c;
+    --btn: #5b60f6;
+    --btn-hover: #3e44c8;
+    color: #111;
+  }
+}
+/*──────────────────────────────────────────────────*
+ *  PHONE-UI MENU BUTTON OVERRIDES                
+ *──────────────────────────────────────────────────*/
+body.phone-ui .options-container > button,
+body.phone-ui #options-panel button {
+  font-size: 0.7rem !important;      /* smaller text */
+  padding: 0.4rem 0.6rem !important;  /* tighter hit area */
+  min-width: auto !important;        /* let them flex */
+  border-radius: 6px !important;     /* match your other UI */
+  background: var(--btn) !important; /* match normal buttons */
+  transition: background 0.2s !important;
+}
+body.phone-ui .options-container > button:hover,
+body.phone-ui #options-panel button:hover {
+  background: var(--btn-hover) !important;
 }

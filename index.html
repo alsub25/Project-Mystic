@@ -43,6 +43,15 @@
       <label for="opt-sfx-volume">SFX Volume:</label>
       <input type="range" id="opt-sfx-volume" min="0" max="100" value="50">
     </div>
+      <div class="option-row">
+    <label for="opt-ui">UI Mode:</label>
+    <select id="opt-ui">
+      <option value="auto">Auto</option>
+      <option value="pc">PC</option>
+      <option value="phone">Phone</option>
+    </select>
+  </div>
+
     <button id="opt-back">Back</button>
   </div>
 
@@ -57,6 +66,8 @@
         <button id="opt-new-game">🆕 New Game</button>
         <button id="opt-save">💾 Save</button>
         <button id="opt-load">📂 Load</button>
+<button id="opt-developer">🛠 Developer Menu</button>
+<button id="opt-options">⚙️ Options</button>
       </div>
     </div>
 
@@ -135,6 +146,12 @@
           <p><strong>Level:</strong> <span id="enemy-level"></span></p>
           <p><strong>HP:</strong> <span id="enemy-hp"></span> / <span id="enemy-maxhp"></span></p>
           <div class="bar-container"><div id="enemy-hp-bar" class="bar-fill enemy"></div></div>
+
+          <!-- NEW: enemy mana just like hero -->
+          <p id="enemy-mana-row"><strong>Mana:</strong> <span id="enemy-mana-text"></span> / <span id="enemy-maxmana-text"></span></p>
+          <div id="enemy-mana-bar-container" class="bar-container">
+            <div id="enemy-mana-bar" class="bar-fill mana"></div>
+          </div>
         </div>
       </div>
       <p id="log" class="log"></p>
