@@ -1,4 +1,4 @@
-# 🔖 Project: Mystic
+# (Codename) 🔖 Project: Mystic V0.5
 
 _An HTML5/JavaScript-powered pixel-style RPG featuring tactical battles, character customization, spells, gear, skill progression, and both PC and mobile UI modes._
 
@@ -153,3 +153,22 @@ Includes:
 ## 📜 License
 
 MIT — feel free to use and modify!
+
+---
+
+## 📌 To Do / Ideas
+
+- Add quest and lore systems
+- Implement map exploration and NPC interactions
+- Add consumable items and inventory management
+- Add multiplayer support or PvP mode
+- Introduce skill synergies and class ultimates
+- Procedural gear with rarity and modifiers
+- Add elemental resistances and status effects (burn, freeze, etc)
+- Dynamic weather or time-of-day effects
+- Visual polish: particle effects, animations
+- Boss-specific gear sets or achievements
+- UI fixes and modernization
+
+
+
