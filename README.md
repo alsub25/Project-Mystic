@@ -169,6 +169,6 @@ MIT — feel free to use and modify!
 - Visual polish: particle effects, animations
 - Boss-specific gear sets or achievements
 - UI fixes and modernization
-
+- Deepen all other systems
 
 
