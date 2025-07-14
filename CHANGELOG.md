@@ -56,9 +56,3 @@ All notable changes to this project will be documented in this file.
 - **Inventory Management** – No consumables or item stacking support  
 - **Procedural Gear** – Rarity and modifier systems pending  
 - **Weather/Time-of-Day** – Framework exists but effects are not yet active  
-
----
-
-[Compare changes](https://github.com/yourusername/project-mystic/compare/v0.4.0...v0.5.0)
-
-[0.5.0]: https://github.com/yourusername/project-mystic/releases/tag/v0.5.0  
