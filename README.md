@@ -170,5 +170,5 @@ MIT — feel free to use and modify!
 - Boss-specific gear sets or achievements
 - UI fixes and modernization
 - Deepen all other systems
-
+- Modularize the code 
 
